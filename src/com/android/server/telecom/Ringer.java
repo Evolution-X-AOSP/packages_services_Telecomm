@@ -22,23 +22,22 @@ import android.app.Person;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.camera2.CameraManager;
-import android.os.AsyncTask;
 import android.database.ContentObserver;
-import android.os.VibrationEffect;
-import android.provider.Settings;
-import android.telecom.Log;
-import android.telecom.TelecomManager;
+import android.hardware.camera2.CameraManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.VolumeShaper;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
+import android.telecom.Log;
+import android.telecom.TelecomManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.telecom.LogUtils.EventTimer;
@@ -231,7 +230,7 @@ public class Ringer {
     private CompletableFuture<Void> mBlockOnRingingFuture = null;
 
     private CompletableFuture<Void> mVibrateFuture = CompletableFuture.completedFuture(null);
-     
+
     private TorchToggler torchToggler;
 
     private InCallTonePlayer mCallWaitingPlayer;
@@ -551,8 +550,10 @@ public class Ringer {
         stopRinging();
 
         if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.VIBRATE_ON_CALLWAITING, 1, UserHandle.USER_CURRENT) == 1) {
-            vibrate(200, 300, 500);
+                Settings.System.INCALL_FEEDBACK_VIBRATE, 0, UserHandle.USER_CURRENT) == 1) {
+            if (mVibrator.hasVibrator()) {
+                mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_THUD));
+            }
         }
 
         if (mCallWaitingPlayer == null) {
@@ -702,7 +703,7 @@ public class Ringer {
                         Long.parseLong(customVib[1]), // How long to vibrate
                         400, // Delay
                         Long.parseLong(customVib[2]), // How long to vibrate
-                        400, // How long to wait before vibrating again            
+                        400, // How long to wait before vibrating again
                     };
                     mDefaultVibrationEffect = mVibrationEffectProxy.createWaveform(vibPattern,
                             SEVEN_ELEMENTS_VIBRATION_AMPLITUDE, REPEAT_SIMPLE_VIBRATION_AT);
@@ -727,13 +728,6 @@ public class Ringer {
         public void onChange(boolean SelfChange) {
             updateVibrationPattern();
         }
-    }
-
-    public void vibrate(int v1, int p1, int v2) {
-        long[] pattern = new long[] {
-            0, v1, p1, v2
-        };
-        ((Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, -1);
     }
 
     private class TorchToggler extends AsyncTask {
