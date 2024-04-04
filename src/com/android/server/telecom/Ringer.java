@@ -987,7 +987,7 @@ public class Ringer {
     private static VibrationEffect createSimpleRingVibration(
             VibrationEffectProxy vibrationEffectProxy) {
         return vibrationEffectProxy.createWaveform(SIMPLE_VIBRATION_PATTERN,
-                SIMPLE_VIBRATION_AMPLITUDE, REPEAT_SIMPLE_VIBRATION_AT);
+                FIVE_ELEMENTS_VIBRATION_AMPLITUDE, REPEAT_SIMPLE_VIBRATION_AT);
     }
 
     private void updateVibrationPattern() {
